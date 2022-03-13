@@ -32,7 +32,16 @@ mutation CreateAPet($newPet: NewPetInput!) {
 export default function Pets () {
   const [modal, setModal] = useState(false)
   const {data, loading, error} = useQuery(ALL_PETS)
-  const  [createPet,  newPet] = useMutation(NEW_PET)
+  const  [createPet,  newPet] = useMutation(NEW_PET, {
+    update(cache, {data: {addPet}}){
+      const data = cache.readQuery({query: ALL_PETS})
+
+      cache.writeQuery({
+        query: ALL_PETS,
+        data: {pets: [addPet, ...data.pets]}
+      })
+    }
+  })
 
 
   const onSubmit = input => {
@@ -40,11 +49,21 @@ export default function Pets () {
     createPet({
       variables: {
         newPet: input
+      },
+      optimisticResponse:{
+        __typename: 'Mutation',
+        addPet: {
+          __typename: 'Pet',
+          id: Math.floor(Math.random() * 1000) + "",
+          name: input.name,
+          type: input.type,
+          img: 'https://via.placeholder.com/300'
+        }
       }
     })
   }
 
-  if(loading || newPet.loading){
+  if(loading){
     return  <Loader />
   }
 
