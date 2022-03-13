@@ -13,6 +13,10 @@ query AllPets {
     name
     type
     img
+    owner {
+      id
+      age @client
+    }
   }
 }
 
@@ -25,6 +29,10 @@ mutation CreateAPet($newPet: NewPetInput!) {
     name
     type
     img
+    owner {
+      id
+      age @client
+    }
   }
 }
 `
@@ -70,7 +78,8 @@ export default function Pets () {
   if(error || newPet.error){
     return  <p>Error!</p>
   }
-  
+
+
   if (modal) {
     return <NewPetModal onSubmit={onSubmit} onCancel={() => setModal(false)} />
   }
